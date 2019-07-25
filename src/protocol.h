@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Core developers
+// Copyright (c) 2009-2019 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -48,10 +48,10 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
-        READWRITE(FLATDATA(pchMessageStart));
-        READWRITE(FLATDATA(pchCommand));
+        READWRITE(pchMessageStart);
+        READWRITE(pchCommand);
         READWRITE(nMessageSize);
-        READWRITE(FLATDATA(pchChecksum));
+        READWRITE(pchChecksum);
     }
 
     char pchMessageStart[MESSAGE_START_SIZE];
@@ -261,9 +261,6 @@ enum ServiceFlags : uint64_t {
     // NODE_WITNESS indicates that a node can be asked for blocks and transactions including
     // witness data.
     NODE_WITNESS = (1 << 3),
-    // NODE_XTHIN means the node supports Xtreme Thinblocks
-    // If this is turned off then the node will not service nor make xthin requests
-    NODE_XTHIN = (1 << 4),
     // NODE_NETWORK_LIMITED means the same as NODE_NETWORK with the limitation of only
     // serving the last 288 (2 day) blocks
     // See BIP159 for details on how this is implemented.
@@ -349,7 +346,7 @@ public:
         uint64_t nServicesInt = nServices;
         READWRITE(nServicesInt);
         nServices = static_cast<ServiceFlags>(nServicesInt);
-        READWRITE(*static_cast<CService*>(this));
+        READWRITEAS(CService, *this);
     }
 
     // TODO: make private (improves encapsulation)
@@ -402,7 +399,6 @@ public:
     std::string GetCommand() const;
     std::string ToString() const;
 
-    // TODO: make private (improves encapsulation)
 public:
     int type;
     uint256 hash;
